@@ -47,8 +47,8 @@
         <p><strong>Email:</strong> {{ selectedStudent.email }}</p>
         <p><strong>Phone:</strong> {{ selectedStudent.phone }}</p>
         <p><strong>Department:</strong> {{ selectedStudent.department }}</p>
-        <p><strong>Mark %:</strong> {{ selectedStudent.marks }}</p>
-        <p><strong>Attendance %:</strong> {{ selectedStudent.attendance }}</p>
+        <p><strong>Marks %:</strong> {{ selectedStudent.mark_percentage ?? 'N/A' }}</p>
+        <p><strong>Attendance %:</strong> {{ selectedStudent.attendance_percentage ?? 'N/A' }}</p>
         <div>
           <canvas ref="attendanceChart" width="250" height="250"></canvas>
         </div>
@@ -82,15 +82,20 @@ export default {
       this.showResults = !this.showResults;
     },
     viewDetails(student) {
-      this.selectedStudent = student;
-      this.$nextTick(this.renderChart);
+    console.log('Viewing student details:', student);
+    console.log('Student object keys:', Object.keys(student));
+    console.log('Attendance value:', student.attendance);
+    this.selectedStudent = student;
+    this.$nextTick(this.renderChart);
     },
     renderChart() {
+      if (!this.selectedStudent || this.selectedStudent.attendance_percentage === undefined) return;
+
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
 
-      const present = this.selectedStudent.attendance;
+      const present = this.selectedStudent.attendance_percentage;
       const absent = 100 - present;
 
       const ctx = this.$refs.attendanceChart.getContext('2d');
@@ -119,6 +124,8 @@ export default {
   }
 };
 </script>
+
+
 
 <style scoped>
 .student-list-container {

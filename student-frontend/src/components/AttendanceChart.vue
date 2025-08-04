@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -18,47 +18,64 @@ const props = defineProps<Props>();
 const chartCanvas = ref<HTMLCanvasElement>();
 let chartInstance: Chart | null = null;
 
-onMounted(() => {
-  if (chartCanvas.value) {
-    const presentPercent = props.attendancePercent;
-    const absentPercent = 100 - presentPercent;
+const renderChart = () => {
+  if (!chartCanvas.value) return;
 
-    chartInstance = new Chart(chartCanvas.value, {
-      type: 'pie',
-      data: {
-        labels: ['Present', 'Absent'],
-        datasets: [{
-          data: [presentPercent, absentPercent],
-          backgroundColor: ['#10B981', '#EF4444'],
-          borderColor: ['#059669', '#DC2626'],
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 20,
-              usePointStyle: true
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                return `${context.label}: ${context.parsed}%`;
-              }
-            }
+  const presentPercent = Number(props.attendancePercent);
+  const absentPercent = 100 - presentPercent;
+
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(chartCanvas.value, {
+    type: 'pie',
+    data: {
+      labels: ['Present', 'Absent'],
+      datasets: [{
+        data: [presentPercent, absentPercent],
+        backgroundColor: ['#10B981', '#EF4444'],
+        borderColor: ['#059669', '#DC2626'],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            usePointStyle: true
           }
         },
-        animation: {
-          animateRotate: true,
-          duration: 1000
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              return `${context.label}: ${context.parsed}%`;
+            }
+          }
         }
+      },
+      animation: {
+        animateRotate: true,
+        duration: 1000
       }
-    });
+    }
+  });
+};
+
+onMounted(() => {
+  if (props.attendancePercent != null) {
+    renderChart();
+  }
+});
+
+// Reactively watch for updates to attendancePercent
+watch(() => props.attendancePercent, (newVal) => {
+  if (newVal != null) {
+    renderChart();
   }
 });
 
@@ -67,6 +84,7 @@ onUnmounted(() => {
     chartInstance.destroy();
   }
 });
+
 </script>
 
 <style scoped>

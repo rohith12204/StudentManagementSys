@@ -1,10 +1,13 @@
 <template>
   <div class="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-xl w-full shadow-lg relative">
+      <!-- Close Button -->
       <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-700" @click="$emit('close')">&times;</button>
       
+      <!-- Title -->
       <h2 class="text-2xl font-bold mb-4">{{ student.name }}'s Details</h2>
 
+      <!-- Student Info -->
       <div class="grid grid-cols-2 gap-4 text-sm text-gray-700 mb-6">
         <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
         <p><strong>Department:</strong> {{ student.department }}</p>
@@ -12,12 +15,14 @@
         <p><strong>Phone:</strong> {{ student.phone }}</p>
         <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
         <p><strong>Age:</strong> {{ student.age }}</p>
-        <p><strong>Attendance:</strong> {{ student.attendance }}%</p>
-        <p><strong>Mark:</strong> {{ student.marks }}%</p>
+        <p><strong>Attendance:</strong> {{ student.attendance_percentage }}%</p>
+        <p><strong>Mark:</strong> {{ student.mark_percentage }}%</p>
       </div>
-
+      
+      
       <!-- Attendance Pie Chart -->
-      <AttendanceChart :present="student.attendance" />
+       <p><strong>Debug attendance:</strong> {{ student.attendance_percentage }}</p>
+      <AttendanceChart :attendancePercent="Number(student.attendance_percentage)" />
 
       <!-- Show Results Button -->
       <div class="mt-4 flex justify-center">
@@ -29,9 +34,9 @@
         </button>
       </div>
 
-      <!-- Results Bar Chart shown only after clicking button -->
+      <!-- Results Bar Chart -->
       <div v-if="showResults" class="mt-6">
-        <ResultsChart :marks="student.marks" />
+        <ResultsChart :marks="Number(student.mark_percentage)" />
       </div>
 
       <!-- Actions -->
@@ -39,7 +44,7 @@
         <button @click="$emit('edit', student)" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
           Edit
         </button>
-        <button @click="$emit('delete', student.id)" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+        <button @click="handleDelete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
           Delete
         </button>
       </div>
@@ -47,73 +52,26 @@
   </div>
 </template>
 
-<script>
-import AttendanceChart from './AttendanceChart.vue'
-import ResultsChart from './ResultsChart.vue'
-
-export default {
-  name: 'StudentDetail',
-  props: ['student'],
-  components: {
-    AttendanceChart,
-    ResultsChart
-  },
-  data() {
-    return {
-      showResults: false
-    }
-  }
-}
-</script>
-
-
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref } from 'vue';
 import AttendanceChart from './AttendanceChart.vue';
-import StudentForm from './StudentForm.vue';
+import ResultsChart from './ResultsChart.vue';
 
-const props = defineProps(['student']);
-const emit = defineEmits(['close', 'update', 'delete']);
+const { student } = defineProps(['student']); // ✅ Destructured here
+console.log("Student prop:", JSON.stringify(student, null, 2));
 
-const isEditing = ref(false);
-
-const editFormData = reactive({
-  rollNo: '',
-  name: '',
-  department: '',
-  dob: '',
-  age: 0,
-  phone: '',
-  email: '',
-  attendancePercent: 0,
-  markPercent: 0,
-  photo: null
-});
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-};
-
-const startEdit = () => {
-  Object.assign(editFormData, props.student);
-  isEditing.value = true;
-};
-
-const handleUpdate = (data) => {
-  emit('update', props.student.id, data);
-  isEditing.value = false;
-};
+const emit = defineEmits(['close', 'edit', 'delete']);
+const showResults = ref(false);
 
 const handleDelete = () => {
-  if (confirm(`Are you sure you want to delete ${props.student.name}?`)) {
-    emit('delete', props.student.id);
+  if (confirm(`Are you sure you want to delete ${student.name}?`)) {
+    emit('delete', student.id);
   }
 };
 </script>
+
+
+
 
 <style scoped>
 /* same CSS as your original */

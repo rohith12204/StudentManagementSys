@@ -15,7 +15,7 @@ class StudentSerializer(serializers.ModelSerializer):
             'email',
             'phone',
             'department',
-            'attendance_percentage',  # <--- ADD
+            'attendance_percentage',  
             'mark_percentage', 
             'image',
             'image_path',

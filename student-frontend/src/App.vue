@@ -10,10 +10,12 @@
 
     <!-- Student List -->
     <StudentList
-      :students="students"
-      @delete-student="removeStudentFromList"
-      @update-student="updateStudentInList"
+    :students="students"
+    @delete-student="removeStudentFromList"
+    @update-student="updateStudentInList"
+    @view-student="selectedStudent = $event"
     />
+
 
 
     <!-- Student Detail Modal -->
